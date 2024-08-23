@@ -3,6 +3,12 @@ from flask_security import UserMixin, RoleMixin
 
 db = SQLAlchemy()
 
+class RolesUsers(db.Model):
+    __tablename__ = 'roles_users'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, unique=False)
