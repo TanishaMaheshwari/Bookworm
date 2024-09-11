@@ -3,7 +3,7 @@ from flask_security import Security
 from application.models import db, User, Role
 from application.sec import datastore
 from config import DevelopmentConfig
-from application.resource import api
+from application.registeration import api
 
 def create_app():
     app = Flask(__name__)
