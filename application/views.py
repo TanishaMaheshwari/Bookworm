@@ -141,6 +141,47 @@ def add_section():
     db.session.commit()
     return jsonify({"message": "Section created successfully"}), 201
 
+# 
+# @app.post('/edit_section/<int:section_id>')
+# @auth_required("token")
+# @roles_required("librarian")
+# def edit_section(section_id):
+    # data = request.get_json()
+    # name = data.get('name')
+    # description = data.get('description')
+# 
+    # if not name:
+        # return jsonify({"message": "name not provided"}), 400
+    # if not description:
+        # return jsonify({"message": "description not provided"}), 400
+    # 
+    # section = Section.query.get(section_id)
+# 
+    # if not section:
+        # return {"message":"Section doesnt exist"},401
+    # 
+    # section.name = name
+    # section.description = description
+    # db.session.commit()
+    # return jsonify({"message": "Section created successfully"}), 201
+
+
+@app.delete('/sections/<int:section_id>')
+@auth_required("token")
+@roles_required("librarian")
+def delete_section(section_id):
+    section = Section.query.get(section_id)
+    if not section:
+        return jsonify({"message": "Section not found"}), 400
+
+    books = Book.query.filter_by(section_id=section_id).all()
+    for book in books:
+        db.session.delete(book)
+    db.session.commit()
+
+    db.session.delete(section)
+    db.session.commit()
+    return jsonify({"message": "Section deleted successfully"}), 200
 
 @app.get('/books')
 @auth_required("token")
@@ -148,7 +189,9 @@ def all_books():
     books = Book.query.all()
     if len(books)==0:
         return jsonify({"message": "No Books Found"}), 404
-    book_info = [{"id": book.id, "title": book.title, "author": book.author, "price": book.price, "section": book.section_id} for book in books]
+    book_info = [{"id": book.id, "title": book.title, "author": book.author, "price": book.price,
+                "section": db.session.query(Section).filter_by(id=book.section_id).first().name} 
+                for book in books]
     return (book_info)
 
 @app.post('/add_book')
@@ -158,6 +201,8 @@ def add_book():
     title = data.get('title')
     author = data.get('author')
     price = data.get('price')
+    sample =data.get('sample')
+    text= data.get('text')
     section = data.get('section')
 
     if not title:
@@ -166,6 +211,10 @@ def add_book():
         return jsonify({"message": "Author not provided"}), 400
     if not price:
         return jsonify({"message": "Price not provided"}), 400
+    if not sample:
+        return jsonify({"message": "Section not provided"}), 400
+    if not text:
+        return jsonify({"message": "Section not provided"}), 400
     if not section:
         return jsonify({"message": "Section not provided"}), 400
     
@@ -182,7 +231,7 @@ def add_book():
         return jsonify({"message": "Multiple sections found with the same name"}), 400
 
     if sections:
-        new_book = Book(title=title, author=author, price=price, section_id=sections[0].id)
+        new_book = Book(title=title, author=author, price=price, sample=sample, text=text, section_id=sections[0].id)
         db.session.add(new_book)
         db.session.commit()
         return jsonify({"message": "Book added successfully"}), 201

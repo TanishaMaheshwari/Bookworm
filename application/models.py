@@ -40,6 +40,8 @@ class Book(db.Model):
     title = db.Column(db.String, nullable=False)
     author = db.Column(db.String, nullable=False)
     price = db.Column(db.Integer, nullable=False)
+    sample = db.Column(db.String, nullable=False)
+    text = db.Column(db.String, nullable=False)
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
 
 class UsersSections(db.Model):

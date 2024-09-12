@@ -28,12 +28,12 @@ export default{
       <li class="nav-item">
         <a class="nav-link" href="#" v-if="role=='librarian'">Profile</a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#" v-if="role=='reader'">Home</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#" v-if="role=='reader'">Books</a>
-      </li>
+      <li class="nav-item" v-if="role=='reader'">
+        <router-link class="nav-link" to="/">Home</router-link>
+      </li> 
+      <li class="nav-item" v-if="role=='reader'">
+        <router-link class="nav-link" to="/book">Books</router-link>
+      </li>      
       <li class="nav-item">
         <a class="nav-link" href="#" v-if="role=='reader'">History</a>
       </li>

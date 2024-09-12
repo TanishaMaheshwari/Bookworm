@@ -4,12 +4,12 @@ export default{
     <div class="form text-center" >
 
     <div class="form-floating mb-3">
-      <input type="text" class="form-control" id="floatingInputName" v-model="section.name" placeholder="name" required>
+      <input type="text" class="form-control" id="floatingInputName" v-model="section.name" placeholder="name" required  @keydown.enter="add_section">
       <label for="name">Name</label>
     </div>
 
     <div class="form-floating mb-3">
-      <input type="text" class="form-control" id="floatingInputDescription" v-model="section.description" placeholder="description" required>
+      <input type="text" class="form-control" id="floatingInputDescription" v-model="section.description" placeholder="description" required @keydown.enter="add_section">
       <label for="description">Description</label>
     </div>
 

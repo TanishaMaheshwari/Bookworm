@@ -3,11 +3,11 @@ export default{
         <h1 class="display-5 text-center mt-5">Login Page</h1>
         <div class="form text-center" style="max-width: 400px; padding: 20px; margin: 40px auto; ">
         <div class="form-floating mb-3">
-          <input type="email" class="form-control" id="floatingInput" v-model= "credentials.email" placeholder="email" required>
+          <input type="email" class="form-control" id="floatingInput" v-model= "credentials.email" placeholder="email" required @keydown.enter="login">
           <label for="email">Email</label>
         </div>
         <div class="form-floating mb-3">
-          <input type="password" class="form-control" id="floatingPassword" v-model= "credentials.password" placeholder="Password" required>
+          <input type="password" class="form-control" id="floatingPassword" v-model= "credentials.password" placeholder="Password" required @keydown.enter="login">
           <label for="Password">Password</label>
         </div>
         <p class="text-danger m-4">{{error}}</p>

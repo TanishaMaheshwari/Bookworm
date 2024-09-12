@@ -19,6 +19,16 @@ export default{
   </div>
 
   <div class="form-floating mb-3">
+    <input type="text" class="form-control" id="floatingInputSample" v-model="books.sample" placeholder="sample" required>
+    <label for="sample">Sample</label>
+  </div>
+
+  <div class="form-floating mb-3">
+    <input type="text" class="form-control" id="floatingInputtext" v-model="books.text" placeholder="text" required>
+    <label for="text">URL</label>
+  </div>
+
+  <div class="form-floating mb-3">
     <select class="form-select" id="floatingInputSection" v-model="books.section" required>
       <option value="section">Select Section</option>
       <option v-for="section in sections" :key="section.id" :value="section.name">{{ section.name }}</option>
@@ -36,7 +46,9 @@ export default{
               title: null,
               author: null,
               price: null,
-              section: null
+              sample: null,
+              text: null,
+              section: null,
           },
           sections:[],
           token: localStorage.getItem('auth-token'),
