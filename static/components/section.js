@@ -39,12 +39,18 @@ export default {
       searchName: '',
       searchDescription: '',
       error: null,
+      sectionId: null,
       token: localStorage.getItem('auth-token'),
     }
   },
   methods: {
     add_section() {
-      this.$router.push({ path: '/add_section' })
+      this.$router.push({ path: `/add_section` })
+    },
+    editSection(sectionId){
+      this.sectionId = sectionId;
+      localStorage.setItem('sectionId',sectionId)
+      this.$router.push({ path: `/edit_section/${sectionId}`})
     },
     searchSections() {
       this.filteredSections = this.allSections.filter(section => {
@@ -95,7 +101,6 @@ export default {
       })
       const data = await res.json().catch((e) => {})
       if (res.ok) {
-        console.log(data)
         this.allSections = data
         this.filteredSections = data
       } else {

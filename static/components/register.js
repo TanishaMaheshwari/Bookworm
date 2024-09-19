@@ -42,11 +42,11 @@ export default {
       async create_user() {
         fetch('/user-register',
                 {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(this.user)
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(this.user)
                 }
             )
 
@@ -55,7 +55,7 @@ export default {
                     if (res.ok) {
                         localStorage.setItem('auth-token', data.token)
                         localStorage.setItem('role', data.role)
-                        this.$router.push({path: '/'})
+                        this.$router.push({path: '/login'})
                         alert(data.message)
                     } else {
                         this.error = data.message

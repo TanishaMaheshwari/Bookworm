@@ -23,10 +23,10 @@ export default{
         <router-link class="nav-link" to="/section" v-if="role=='librarian'">Sections</router-link>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" v-if="role=='librarian'">Payments</a>
+      <router-link class="nav-link" to="/requests" v-if="role=='librarian'">Requests</router-link>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" v-if="role=='librarian'">Profile</a>
+        <router-link class="nav-link" to="/payment" v-if="role=='librarian'">Payments</router-link>
       </li>
       <li class="nav-item" v-if="role=='reader'">
         <router-link class="nav-link" to="/">Home</router-link>
@@ -35,25 +35,22 @@ export default{
         <router-link class="nav-link" to="/book">Books</router-link>
       </li>      
       <li class="nav-item">
-        <a class="nav-link" href="#" v-if="role=='reader'">History</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#" v-if="role=='reader'">Profile</a>
+        <router-link class="nav-link" to='/profile' v-if="role=='reader'">Wallet</router-link>
       </li>
       <button type="button" class="btn btn-outline-danger" v-if="is_login" @click='logout'><i class="fas fa-power-off"></i></button>  
     </ul>
     </div>
     </nav>`,
     data() {
-      console.log('role:', localStorage.getItem('role'))
-      console.log('is_login:', localStorage.getItem('auth-token'))
       return {
+
         role: localStorage.getItem('role'),
         is_login: localStorage.getItem('auth-token'),
       }
     },
     methods: {
       logout() {
+        localStorage.removeItem('user_id')
         localStorage.removeItem('auth-token')
         localStorage.removeItem('role')
         this.$router.push({ path: '/login' })

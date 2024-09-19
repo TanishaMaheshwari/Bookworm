@@ -36,6 +36,7 @@ export default{
             const data = await response.json()
             if (response.ok){
                 console.log(data)
+                localStorage.setItem('user_id', data.id)
                 localStorage.setItem('auth-token', data.token)
                 localStorage.setItem('role', data.role)
                 this.$router.push({ path: '/', query: {role: data.role}})

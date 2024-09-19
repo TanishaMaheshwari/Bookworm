@@ -1,9 +1,12 @@
-from flask import current_app as app, jsonify, request, render_template
+from flask import current_app as app, jsonify, request, render_template, send_file
 from flask_security import auth_required, roles_required
 from flask_restful import marshal, fields
-from application.models import db, User, Section, Book
+from application.models import db, User, Section, Book, BookRequest, BookBought
 from application.sec import datastore
 from werkzeug.security import check_password_hash, generate_password_hash
+import flask_excel as excel
+from .tasks import create_resource_csv
+from celery.result import AsyncResult
 
 @app.get('/')
 def home():
@@ -59,7 +62,10 @@ def user_login():
     if not check_password_hash(user.password, data.get('password')):
         return jsonify({"message":"*Incorrect password*"}), 400
     
-    return jsonify({"token": user.get_auth_token(), "email": user.email, "role": user.roles[0].name, "balance": user.balance})
+    if not user.active:
+        return jsonify({"message":"*You have been Flagged.*"}), 400
+    
+    return jsonify({"id":user.id,"token": user.get_auth_token(), "email": user.email, "role": user.roles[0].name, "balance": user.balance})
 
 user_fields = {
     "id": fields.Integer,
@@ -68,12 +74,6 @@ user_fields = {
     "balance": fields.Integer,
     "active": fields.Boolean
 }
-
-@app.get('/admin')
-@auth_required("token")
-@roles_required("librarian")
-def admin():
-    return "Hello Admin/Librarian."
 
 @app.get('/users')
 @auth_required("token")
@@ -141,30 +141,6 @@ def add_section():
     db.session.commit()
     return jsonify({"message": "Section created successfully"}), 201
 
-# 
-# @app.post('/edit_section/<int:section_id>')
-# @auth_required("token")
-# @roles_required("librarian")
-# def edit_section(section_id):
-    # data = request.get_json()
-    # name = data.get('name')
-    # description = data.get('description')
-# 
-    # if not name:
-        # return jsonify({"message": "name not provided"}), 400
-    # if not description:
-        # return jsonify({"message": "description not provided"}), 400
-    # 
-    # section = Section.query.get(section_id)
-# 
-    # if not section:
-        # return {"message":"Section doesnt exist"},401
-    # 
-    # section.name = name
-    # section.description = description
-    # db.session.commit()
-    # return jsonify({"message": "Section created successfully"}), 201
-
 
 @app.delete('/sections/<int:section_id>')
 @auth_required("token")
@@ -183,14 +159,15 @@ def delete_section(section_id):
     db.session.commit()
     return jsonify({"message": "Section deleted successfully"}), 200
 
-@app.get('/books')
+@app.get('/all_books')
 @auth_required("token")
 def all_books():
     books = Book.query.all()
-    if len(books)==0:
-        return jsonify({"message": "No Books Found"}), 404
+    if not books:
+        return jsonify({"message": "No books found in the database"}), 400
     book_info = [{"id": book.id, "title": book.title, "author": book.author, "price": book.price,
-                "section": db.session.query(Section).filter_by(id=book.section_id).first().name} 
+                "section": db.session.query(Section).filter_by(id=book.section_id).first().name,
+                "section_id": book.section_id} 
                 for book in books]
     return (book_info)
 
@@ -237,3 +214,122 @@ def add_book():
         return jsonify({"message": "Book added successfully"}), 201
     else:
         return jsonify({"message": "Section not found"}), 404
+
+
+@app.post('/book_request')
+@auth_required("token")
+def book_request():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    book_id = data.get('book_id')
+    section_id = data.get('section_id')
+
+    existing_request = BookRequest.query.filter_by(user_id=user_id, book_id=book_id, section_id=section_id).first()
+    if existing_request:
+        return jsonify({"message": "Request already sent"}), 400 
+
+    new_request = BookRequest(user_id=user_id, book_id=book_id, section_id=section_id, approval=False)
+    db.session.add(new_request)
+    db.session.commit()
+
+    return jsonify({"message": "Request sent successfully"}), 200
+
+@app.get('/all_requests')
+@auth_required("token")
+@roles_required("librarian")
+def all_requests():
+    reqs = BookRequest.query.all()
+    
+    info = [{"id": req.id, 
+             "user": req.user.username,
+             "book": req.book.title, 
+             "author": req.book.author, 
+             "section": req.section.name,
+             "approval": req.approval}  
+             for req in reqs]
+    return jsonify(info)
+
+@app.put('/approve/<int:id>')
+@auth_required("token")
+@roles_required("librarian")
+def approve_request(id):
+    book = BookRequest.query.get(id)
+
+    book.approval=True
+    db.session.commit()
+
+    return jsonify({"message": "Request approved successfully"}), 200
+
+@app.get('/all_book_requested/<int:user_id>')
+@auth_required("token")
+def all_book_requested(user_id):
+    reqs = BookRequest.query.filter_by(user_id=user_id).all()
+    
+    info = [{"id": req.id, 
+             "book": req.book.title, 
+             "author": req.book.author, 
+             "section": req.section.name,
+             "approval": req.approval}  
+             for req in reqs]
+    return jsonify(info)
+
+@app.delete('/users/<int:userId>/return_book/<int:bookReqId>')
+@auth_required("token")
+def return_book(userId, bookReqId):
+    book_request = BookRequest.query.get(bookReqId)
+    if book_request and book_request.user_id == userId:
+        db.session.delete(book_request)
+        db.session.commit()
+        return jsonify({'message': 'Book returned successfully'}), 200
+    else:
+        return jsonify({'message': 'Failed to return book'}), 400
+    
+@app.get('/users/<int:userId>/read_book/<int:bookReqId>')
+@auth_required("token")
+def read_book(userId, bookReqId):
+    book_request = BookRequest.query.filter_by(user_id=userId, book_id=bookReqId).first()
+    if book_request:
+        book = book_request.book  
+        return jsonify({"url": book.text})
+    else:
+        return jsonify({"error": "Book not found"}), 404  
+
+@app.get('/all_book_bought/<int:user_id>')
+@auth_required("token")
+def all_book_bought(user_id):
+    reqs = BookBought.query.filter_by(user_id=user_id).all()
+    
+    info = [{"id": req.id, 
+             "book": req.book.title, 
+             "author": req.book.author, 
+             "section": req.section.name}  
+             for req in reqs]
+    return jsonify(info)
+
+@app.get('/all_payments')
+@auth_required("token")
+def all_payments():
+    pays = BookBought.query.all()
+    info = [{"id": pay.id, 
+             "username":pay.user.username,
+             "book": pay.book.title, 
+             "author": pay.book.author, 
+             "section": pay.section.name,
+             "price":pay.price}  
+             for pay in pays]
+    return jsonify(info)
+
+@app.get('/download-csv')
+def download_csv():
+    task = create_resource_csv.delay()
+    return jsonify({"task-id": task.id})
+
+
+@app.get('/get-csv/<task_id>')
+def get_csv(task_id):
+    res = AsyncResult(task_id)
+    if res.ready():
+        filename = res.result
+        return send_file(filename, as_attachment=True)
+    else:
+        return jsonify({"message": "Task Pending"}), 404

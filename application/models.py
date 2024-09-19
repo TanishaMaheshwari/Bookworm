@@ -17,12 +17,9 @@ class User(db.Model, UserMixin):
     active = db.Column(db.Boolean())
     balance = db.Column(db.Integer)
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
-    roles = db.relationship('Role', secondary='roles_users',
-                         backref=db.backref('users', lazy='dynamic'))
-    sections = db.relationship('Section', secondary='users_sections',
-                              backref=db.backref('users', lazy='dynamic'))
-    books = db.relationship('Book', secondary='users_books',
-                           backref=db.backref('users', lazy='dynamic'))
+    roles = db.relationship('Role', secondary='roles_users',backref=db.backref('users', lazy='dynamic'))
+    sections = db.relationship('Section', secondary='users_sections',backref=db.backref('users', lazy='dynamic'))
+    books = db.relationship('Book', secondary='users_books',backref=db.backref('users', lazy='dynamic'))
 
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
@@ -43,6 +40,29 @@ class Book(db.Model):
     sample = db.Column(db.String, nullable=False)
     text = db.Column(db.String, nullable=False)
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
+
+class BookRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
+    section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
+    approval = db.Column(db.Boolean, default=False)
+
+    user = db.relationship('User', backref=db.backref('book_requests', lazy=True))
+    book = db.relationship('Book', backref=db.backref('book_requests', lazy=True, cascade='all, delete-orphan'))
+    section = db.relationship('Section', backref=db.backref('book_requests', lazy=True))
+
+class BookBought(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
+    section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
+    price = db.Column(db.Integer, nullable=False)
+    pay = db.Column(db.Boolean, default=True)
+
+    user = db.relationship('User', backref=db.backref('book_bought', lazy=True))
+    book = db.relationship('Book', backref=db.backref('book_bought', lazy=True, cascade='save-update, merge'))
+    section = db.relationship('Section', backref=db.backref('book_bought', lazy=True))
 
 class UsersSections(db.Model):
     __tablename__ = 'users_sections'
