@@ -63,15 +63,3 @@ class BookBought(db.Model):
     user = db.relationship('User', backref=db.backref('book_bought', lazy=True))
     book = db.relationship('Book', backref=db.backref('book_bought', lazy=True, cascade='save-update, merge'))
     section = db.relationship('Section', backref=db.backref('book_bought', lazy=True))
-
-class UsersSections(db.Model):
-    __tablename__ = 'users_sections'
-    id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column('user_id', db.Integer(), db.ForeignKey('user.id'))
-    section_id = db.Column('section_id', db.Integer(), db.ForeignKey('section.id'))
-
-class UsersBooks(db.Model):
-    __tablename__ = 'users_books'
-    id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column('user_id', db.Integer(), db.ForeignKey('user.id'))
-    book_id = db.Column('book_id', db.Integer(), db.ForeignKey('book.id'))
