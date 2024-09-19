@@ -1,9 +1,8 @@
 from celery import shared_task
-from .models import Book
+from .models import Book, User, Role
 import flask_excel as excel
-# from .mail_service import send_message
-# from .models import User, Role
-# from jinja2 import Template
+from .mail_service import send_message
+from jinja2 import Template
 
 
 @shared_task(ignore_result=False)
@@ -19,3 +18,12 @@ def create_resource_csv():
         f.write(csv_output.data)
 
     return filename
+
+@shared_task(ignore_result=True)
+def daily_reminder(to, subject):
+    users = User.query.filter(User.roles.any(Role.name == 'reader')).all()
+    for user in users:
+        with open('test.html', 'r') as f:
+            template = Template(f.read())
+            send_message(user.email, subject, template.render(email=user.email))
+    return "OK"

@@ -4,7 +4,7 @@ from flask import jsonify, request
 from sqlalchemy import or_
 from .models import User, db, Section, Book, BookBought
 from werkzeug.security import generate_password_hash
-# from .instances import cache
+from .instance import cache
 
 
 api = Api(prefix='/api')
@@ -38,8 +38,7 @@ user_fields={
 }
 
 class Section_Resource(Resource):
-    # @auth_required("token")
-    # @cache.cached(timeout=50)
+    @cache.cached(timeout=50)
     def get(self, section_id):
         return marshal(Section.query.get(section_id), section_fields)
 
@@ -68,7 +67,7 @@ class Section_Resource(Resource):
 api.add_resource(Section_Resource, '/sections/<int:section_id>')
 
 class Book_Resource(Resource):
-
+    @cache.cached(timeout=50)
     def get(self, BookID):
         return marshal(Book.query.get(BookID), book_fields)
     
@@ -113,7 +112,7 @@ class Book_Resource(Resource):
 api.add_resource(Book_Resource, '/books/<int:BookID>')
 
 class User_Resource(Resource):
-
+    @cache.cached(timeout=50)
     def get(self, UserID):
         return marshal(User.query.get(UserID), user_fields)
     
@@ -134,6 +133,7 @@ api.add_resource(User_Resource, '/users/<int:UserID>')
 
 class book_bought_resource(Resource):
     @auth_required("token")
+    @cache.cached(timeout=50)
     def post(self):
         data = request.get_json()
         user_id = data.get('user_id')
