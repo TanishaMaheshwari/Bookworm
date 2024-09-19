@@ -76,13 +76,18 @@ user_fields = {
 }
 
 @app.get('/users')
-@auth_required("token")
-@roles_required("librarian")
 def all_users():
     users = User.query.join(User.roles).filter_by(name='reader').all()
     if len(users) == 0:
         return jsonify({"message": "No User Found"}), 404
-    return marshal(users, user_fields)
+    return marshal( users, user_fields)
+
+@app.get('/librarian')
+@auth_required("token")
+@roles_required("librarian")
+def get_librarian():
+    user = User.query.all()[0]
+    return jsonify({"balance": user.balance})
 
 @app.get('/disable/user/<int:user_id>')
 @auth_required("token")
@@ -333,3 +338,32 @@ def get_csv(task_id):
         return send_file(filename, as_attachment=True)
     else:
         return jsonify({"message": "Task Pending"}), 404
+    
+@app.get('/book_chart')
+def book_chart():
+    book_requests = BookRequest.query.all()
+    book_boughts = BookBought.query.all()
+
+    all_books = [br.book for br in book_requests] + [bb.book for bb in book_boughts]
+
+    book_counts = {}
+    for book in all_books:
+        if book.title in book_counts:
+            book_counts[book.title] += 1
+        else:
+            book_counts[book.title] = 1
+
+    top_5_books = sorted(book_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+
+    return jsonify({'top_5_books': top_5_books})
+
+@app.get('/section_chart')
+def section_chart():
+    # Get all sections and count the number of books in each section
+    sections = db.session.query(Section).all()
+    section_counts = {}
+    for section in sections:
+        section_counts[section.name] = len(section.books)
+
+    # Return the result as JSON
+    return jsonify({'sections': list(section_counts.items())})

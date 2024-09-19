@@ -15,9 +15,9 @@ with app.app_context():
     if not datastore.find_user(email="Librarian@email.com"):
         datastore.create_user(username="Librarian", email="Librarian@email.com", password=generate_password_hash("sobo"), 
                             active=True, balance=0, roles=["librarian"])
-        # 
+        
     if not datastore.find_user(email="User@email.com"):
         datastore.create_user(username="user01", email="user01@email.com", password=generate_password_hash("user01"), 
                             active=True, balance=0, roles=["reader"])
-        # 
+        
     db.session.commit()

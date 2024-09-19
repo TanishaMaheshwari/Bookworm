@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Reminder</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .header h1 {
+        margin: 0;
+      }
+      .content {
+        padding: 20px;
+      }
+      .content ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .content li {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+      }
+      .content li:last-child {
+        border-bottom: none;
+      }
+      .footer {
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+        border-radius: 0 0 10px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Daily Reminder</h1>
+      </div>
+      <div class="content">
+        <p>Hello {{ username }},</p>
+        <p><b>Check out Bookworm's:</b> 
+          Don't forget to visit Bookworm's today to explore new titles and authors. 
+          You can also return any borrowed books or renew them for another week.</p>
+      </div>
+      <div class="footer">
+        <p>Best regards, BookWorms</p>
+      </div>
+    </div>
+  </body>
+</html>
