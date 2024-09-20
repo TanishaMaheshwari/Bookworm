@@ -42,9 +42,9 @@ def user_register():
                                  active=True, balance=0, roles=["reader"])
 
     db.session.add(user)
-
     db.session.commit()
-    return jsonify({"token": user.get_auth_token(), "email": user.email, "role": user.roles[0].name}),201
+    return jsonify({"token": user.get_auth_token(), "email": user.email, "role": user.roles[0].name,
+                    "message": "Registration successful! You can now log in with your credentials."}),201
 
 @app.post('/user-login')
 def user_login():
@@ -156,7 +156,14 @@ def delete_section(section_id):
         return jsonify({"message": "Section not found"}), 400
 
     books = Book.query.filter_by(section_id=section_id).all()
+    b_books = BookBought.query.filter_by(section_id=section_id).all()
+    r_books = BookRequest.query.filter_by(section_id=section_id).all()
+
     for book in books:
+        db.session.delete(book)
+    for book in b_books:
+        db.session.delete(book)
+    for book in r_books:
         db.session.delete(book)
     db.session.commit()
 
@@ -360,7 +367,7 @@ def book_chart():
 @app.get('/section_chart')
 def section_chart():
     # Get all sections and count the number of books in each section
-    sections = db.session.query(Section).all()
+    sections = Section.query.all()
     section_counts = {}
     for section in sections:
         section_counts[section.name] = len(section.books)

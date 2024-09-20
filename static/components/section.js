@@ -19,11 +19,11 @@ export default {
         </thead>
         <tbody>
           <tr v-for="section in filteredSections" :key="section.id">
-            <td>{{ section.id }}</td>
-            <td>{{ section.name }}</td>
-            <td>{{ section.description }}</td>
-            <td>{{ section.num_books }}</td>
-            <td>
+            <td style="width: 20px;">{{ section.id }}</td>
+            <td style="width: 30px;">{{ section.name }}</td>
+            <td style="width: 200px;">{{ section.description }}</td>
+            <td style="width: 20px; padding-left: 20px;">{{ section.num_books }}</td>
+            <td style="width: 50px;">
               <button class="btn btn-outline-primary" @click="editSection(section.id)">Edit</button>
               <button class="btn btn-outline-danger" @click="deleteSection(section.id)">Delete</button>
             </td>

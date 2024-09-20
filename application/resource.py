@@ -1,8 +1,8 @@
 from flask_restful import Resource, Api, reqparse, fields, marshal
 from flask_security import auth_required, roles_required, current_user
 from flask import jsonify, request
-from sqlalchemy import or_
-from .models import User, db, Section, Book, BookBought
+from sqlalchemy import or_, exists
+from .models import User, db, Section, Book, BookBought, BookRequest
 from werkzeug.security import generate_password_hash
 from .instance import cache
 
@@ -67,7 +67,7 @@ class Section_Resource(Resource):
 api.add_resource(Section_Resource, '/sections/<int:section_id>')
 
 class Book_Resource(Resource):
-    @cache.cached(timeout=50)
+    # @cache.cached(timeout=50)
     def get(self, BookID):
         return marshal(Book.query.get(BookID), book_fields)
     
@@ -105,6 +105,19 @@ class Book_Resource(Resource):
     @roles_required("librarian")
     def delete(self, BookID):
         dlt_book = Book.query.get(BookID)
+
+        if db.session.query(exists().where(BookRequest.book_id == BookID)).scalar():
+            dlt_req = BookRequest.query.filter_by(book_id=BookID).first()
+            db.session.delete(dlt_req)
+        else:
+            pass
+
+        if db.session.query(exists().where(BookBought.book_id == BookID)).scalar():
+            dlt_bou = BookRequest.query.filter_by(book_id=BookID).first()
+            db.session.delete(dlt_bou)
+        else:
+            pass
+        
         db.session.delete(dlt_book)
         db.session.commit()
         return {"message": "Deleted successfully"}, 200
@@ -112,7 +125,7 @@ class Book_Resource(Resource):
 api.add_resource(Book_Resource, '/books/<int:BookID>')
 
 class User_Resource(Resource):
-    @cache.cached(timeout=50)
+    # @cache.cached(timeout=50)
     def get(self, UserID):
         return marshal(User.query.get(UserID), user_fields)
     

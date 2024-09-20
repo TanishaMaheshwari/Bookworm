@@ -14,6 +14,7 @@ export default {
         <thead>
           <tr>
             <th style="padding-top: 30px;">ID</th>
+            <th style="padding-top: 30px;">Section</th>
             <th style="padding-top: 30px;">Title</th>
             <th style="padding-top: 30px;">Author</th>
             <th style="padding-top: 30px;">Price</th>
@@ -23,6 +24,7 @@ export default {
         <tbody>
           <tr v-for="book in filteredBooks" :key="book.id">
             <td>{{ book.id }}</td>
+            <td>{{ book.section }}</td>
             <td>{{ book.title }}</td>
             <td>{{ book.author }}</td>
             <td>{{ book.price }}</td>
@@ -42,6 +44,7 @@ export default {
       searchAuthor: '',
       searchPrice: '',
       searchTitle: '',
+      isWaiting: null,
       token: localStorage.getItem('auth-token'),
       error: null,
     }
