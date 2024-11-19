@@ -9,7 +9,6 @@
 - [Tech Stack](#tech-stack)
 - [Setup and Installation](#setup-and-installation)
 - [Usage](#usage)
-- [Future Enhancements](#future-enhancements)
 - [Contributing](#contributing)
 
 ---
@@ -96,13 +95,6 @@ Bookworm is a comprehensive library management system aimed at simplifying the m
 - **Librarians** can log in to manage books, check the status of book lending, and send reminders for overdue books.
 - Librarians can use the integrated chart feature to view trending books and top users.
 - **Users** can browse available books, borrow or return them, and receive email notifications.
-
----
-
-## **Future Enhancements**
-- **Advanced Search**: Implement more advanced search filters (e.g., genre, author).
-- **User Profiles**: Allow users to create accounts and track their reading history.
-- **Admin Dashboard**: Add a dashboard for administrators to manage the library inventory and users more effectively.
 
 ---
 
