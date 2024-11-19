@@ -1,4 +1,4 @@
-# **Bookworm - Library Management System**
+# **Bookworm**
 **A library management system designed to streamline book lending, return tracking, and notifications.**
 
 ---
@@ -11,7 +11,6 @@
 - [Usage](#usage)
 - [Future Enhancements](#future-enhancements)
 - [Contributing](#contributing)
-- [License](#license)
 
 ---
 
